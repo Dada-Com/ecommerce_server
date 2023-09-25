@@ -88,7 +88,7 @@ server.use(
   })
 );
 //,
-server.use("/products", productsRouter.router);
+server.use("/products", isAuth(), productsRouter.router);
 // we can also use JWT token for client-only auth
 server.use("/categories", isAuth(), categoriesRouter.router);
 server.use("/brands", isAuth(), brandsRouter.router);
