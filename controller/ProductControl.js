@@ -26,7 +26,10 @@ exports.fetchAllProducts = async (req, res) => {
   let query = Product.find(condition);
   let totalProductsQuery = Product.find(condition);
 
-  console.log("Product Category : ", req.query.category);
+  console.log(
+    "Product Control line no 29 : Product Category : ",
+    req.query.category
+  );
 
   if (req.query.category) {
     query = query.find({ category: { $in: req.query.category.split(",") } });
@@ -54,7 +57,10 @@ exports.fetchAllProducts = async (req, res) => {
     console.log(sortingField);
     console.log(sortingOrder);
   }
-  console.log("Line  no : 57 | req.query.keyword : ", req.query.keyword);
+  console.log(
+    "Product Controller Line  no : 57 | req.query.keyword : ",
+    req.query.keyword
+  );
   if (req.query.keyword) {
     // Use the $regex operator for a case-insensitive title search using a keyword
     query = query.find({

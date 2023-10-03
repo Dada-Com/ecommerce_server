@@ -24,7 +24,7 @@ const crypto = require("crypto");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const { isAuth, sanitizeUser, cookieExtractor } = require("./service/common");
-
+const path = require("path");
 // JWT Option
 const opts = {};
 opts.jwtFromRequest = cookieExtractor;
@@ -69,7 +69,7 @@ server.post(
 //middleware
 ///////////////////////////////////////
 server.use(express.json()); // to parse req.body
-// server.use(express.static("dist"));
+server.use(express.static(path.resolve(__dirname, "dist")));
 server.use(
   session({
     secret: process.env.Session_Secret_Key,
@@ -93,11 +93,14 @@ server.use("/products", isAuth(), productsRouter.router);
 server.use("/categories", isAuth(), categoriesRouter.router);
 server.use("/brands", isAuth(), brandsRouter.router);
 server.use("/users", isAuth(), usersRouter.router);
-server.use("/auth", isAuth(), authRouter.router);
+server.use("/auth", authRouter.router);
 server.use("/cart", isAuth(), cartRouter.router);
 server.use("/orders", isAuth(), ordersRouter.router);
 server.use("/highlight", highlightRouter.router);
 
+server.get("*", (req, res) =>
+  res.sendFile(path.resolve("build", "index.html"))
+);
 // Passport Strategies
 passport.use(
   "local",
@@ -109,7 +112,7 @@ passport.use(
     // by default passport uses username
     try {
       const user = await User.findOne({ email: email });
-      console.log("Lund ", email, password, { user });
+      console.log("Line No 112 index.js ", email, password, { user });
       if (!user) {
         return done(null, false, { message: "invalid credentials" }); // for safety
       }
@@ -154,7 +157,8 @@ passport.use(
 passport.serializeUser(function (user, cb) {
   console.log("serialize", user);
   process.nextTick(function () {
-    return cb(null, user);
+    // return cb(null, user); // 3-10-2023
+    return cb(null, { id: user.id, role: user.role });
   });
 });
 
@@ -163,7 +167,8 @@ passport.serializeUser(function (user, cb) {
 passport.deserializeUser(function (user, cb) {
   console.log("de-serialize", user);
   process.nextTick(function () {
-    return cb(null, { id: user.id, role: user.role });
+    // return cb(null, { id: user.id, role: user.role }); // 3-10-2023
+    return cb(null, user);
   });
 });
 
@@ -179,6 +184,9 @@ server.post("/create-payment-intent", async (req, res) => {
     currency: "inr",
     automatic_payment_methods: {
       enabled: true,
+    },
+    metadata: {
+      orderId, // 3-10-2023
     },
   });
 
